@@ -58,52 +58,59 @@ var ftp = new FoldersFtp(FTPCredentialsConnString, "localhost-ftp");
 // testing.
 var testFileUri = "/test.dat";
 
-// step 1: ls command, show the files in current dir
-ftp.ls('/', function(data) {
-	console.log("ftp server: ls /");
-	console.log(data);
+describe('test for command ls/put/cat', function() {
+	it('should cat the file data we put', function(done) {
 
-	// step 2: write command, put data to ftp server
-	var buf = new Buffer((new Array(960 + 1)).join("Z"));
-	var writeReq = {
-		data : buf,
-		streamId : "test-stream-id",
-		shareId : "test-share-id",
-		uri : testFileUri
-	};
-	ftp.write(writeReq, function(data) {
-
-		console.log("\nwrite buffer(960 Z) to the ftp server,result");
-		console.log(data);
-
-		// step 3: cat command, get the file we put to ftp server
-		var readReq = {
-			data : {
-				fileId : testFileUri,
-				streamId : "test-stream-id",
-			},
-			shareId : "test-share-id"
-		};
-		ftp.cat(readReq, function(result) {
-			console.log("\nget file on ftp server,result");
+		// step 1: ls command, show the files in current dir
+		ftp.ls('/', function(data) {
+			console.log("ftp server: ls /");
 			console.log(data);
 
-			var socket = result.data;
-			// TODO consume socket stream here
-			// var str = "";
-			// socket.on("data", function(d) {str += d;});
-			// socket.on("close", function(hadErr) {});
+			// step 2: write command, put data to ftp server
+			var buf = new Buffer((new Array(960 + 1)).join("Z"));
+			var writeReq = {
+				data : buf,
+				streamId : "test-stream-id",
+				shareId : "test-share-id",
+				uri : testFileUri
+			};
+			ftp.write(writeReq, function(data) {
 
-			console.log("\nclose the socket stream");
-			socket.end();
+				console.log("\nwrite buffer(960 Z) to the ftp server,result");
+				console.log(data);
 
-			// stop the test ftp server
-			// FIXME there still is a `Error: read ECONNRESET` in stop the server.
-			if (ftpServer != null) {
-				server.stop();
-			}
+				// step 3: cat command, get the file we put to ftp server
+				var readReq = {
+					data : {
+						fileId : testFileUri,
+						streamId : "test-stream-id",
+					},
+					shareId : "test-share-id"
+				};
+				ftp.cat(readReq, function(result) {
+					console.log("\nget file on ftp server,result");
+					console.log(data);
+
+					var socket = result.data;
+					// TODO consume socket stream here
+					// var str = "";
+					// socket.on("data", function(d) {str += d;});
+					// socket.on("close", function(hadErr) {});
+
+					console.log("\nclose the socket stream");
+					socket.end();
+
+					// stop the test ftp server
+					// FIXME there still is a `Error: read ECONNRESET` in stop the server.
+					if (ftpServer != null) {
+						server.stop();
+						done();
+					}
+				});
+			});
+
 		});
 	});
-
 });
+
 // });
