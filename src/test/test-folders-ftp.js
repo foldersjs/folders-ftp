@@ -17,9 +17,22 @@ var FTPCredentials = {
 var ftpServer = null;
 if (FTPCredentials.host === "localhost") {
 
+	var ftpd = require("ftpd");
+	ftpServer = ftpd;
+	/*
 	ftpServer = require("ftp-test-server");
 	server = new ftpServer();
 	server.init(FTPCredentials);
+	*/
+	server = new ftpd.FtpServer('127.0.0.1', {
+		getInitialCwd: function () {
+			return '/';
+		},
+		getRoot: function () {
+			return process.cwd();
+		}
+	});
+	server.listen(FTPCredentials.port);
 
 	// server.server.stdout.on('data', function(data) {
 	// console.log("server side, recv out data:");
@@ -60,6 +73,7 @@ var testFileUri = "/test.dat";
 
 describe('test for command ls/put/cat', function() {
 	it('should cat the file data we put', function(done) {
+		this.timeout(5000);
 
 		// step 1: ls command, show the files in current dir
 		ftp.ls('/', function(data) {
@@ -96,14 +110,14 @@ describe('test for command ls/put/cat', function() {
 					// var str = "";
 					// socket.on("data", function(d) {str += d;});
 					// socket.on("close", function(hadErr) {});
-
 					console.log("\nclose the socket stream");
 					socket.end();
 
 					// stop the test ftp server
 					// FIXME there still is a `Error: read ECONNRESET` in stop the server.
 					if (ftpServer != null) {
-						server.stop();
+						// server.stop();
+						server.close();
 						done();
 					}
 				});
