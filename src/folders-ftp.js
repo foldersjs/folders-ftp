@@ -58,6 +58,11 @@ FoldersFtp.prototype.ls = function(path, cb) {
 	self.ftp = this.prepare();
 	self.ftp.raw.cwd("." + cwd, function(err, data) {
 		self.ftp.ls(".", function(err, content) {
+			if (err) {
+				console.error(err);
+				cb(null, error);
+			}
+
 			cb(self.asFolders(path, content));
 
 			// FIXME there is a socket error when use this module after socket.end()
@@ -114,10 +119,17 @@ FoldersFtp.prototype.cat = function(data, cb) {
 
 	// TODO more stat and file check before cat
 	self.ftp.ls(path, function(err, content) {
+
+		if (err) {
+			console.error(err);
+			cb(null, err);
+		}
+
 		var files = self.asFolders(path, content);
 
 		if (files.length <= 0) {
-			// TODO file not exist
+			console.error("file not exist");
+			cb(null, error);
 		}
 		var file = files[0];
 
@@ -167,14 +179,13 @@ FoldersFtp.prototype.write = function(data, cb) {
 
 	self.ftp = this.prepare();
 
-	self.ftp.put(buf, uri, function(hadError) {
-		var result;
-		if (!hadError) {
-			result = "File transferred successfully!";
-		} else {
-			result = "File transferred failed!";
+	self.ftp.put(buf, uri, function(err) {
+		if (err) {
+			console.error("File transferred failed,", err);
+			return cb(null, err);
 		}
-		console.log("file transferred result:" + result);
+
+		console.log("File transferred successfully!");
 		cb({
 			streamId : streamId,
 			data : "write uri success",
