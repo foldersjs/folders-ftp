@@ -8,7 +8,7 @@ var uriParse = require('url');
 var jsftp = require('jsftp');
 // var rush = require('node-rush');
 
-var FoldersFtp = function(connectionString, prefix) {
+var FoldersFtp = function(prefix,connectionString) {
 	this.prefix = prefix;
 	this.connectionString = connectionString;
 };

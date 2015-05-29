@@ -65,7 +65,7 @@ if (typeof (FTPCredentials.host) != 'undefined' && typeof (FTPCredentials.port) 
 }
 
 // start the folder-ftp provider.
-var ftp = new FoldersFtp(FTPCredentialsConnString, "localhost-ftp");
+var ftp = new FoldersFtp("localhost-ftp",FTPCredentialsConnString);
 // test file uri,
 // TODO may want use a /tmp dir file or a special dir in codebase for
 // testing.
