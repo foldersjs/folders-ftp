@@ -8,9 +8,17 @@ var uriParse = require('url');
 var jsftp = require('jsftp');
 // var rush = require('node-rush');
 
-var FoldersFtp = function(prefix,connectionString) {
+var FoldersFtp = function(prefix,options) {
 	this.prefix = prefix;
-	this.connectionString = connectionString;
+	this.connectionString = options.connectionString;
+	
+	// this is a feature to start a embedded Ftp server, using for test/debug
+	var enableEmbeddedServer = options.enableEmbeddedServer || false;
+	if (enableEmbeddedServer){
+		var conn = parseConnString(this.connectionString);
+		var Server = require('./embedded-ftp-server');
+		new Server(conn).start();
+	}
 };
 
 module.exports = FoldersFtp;
@@ -26,21 +34,9 @@ FoldersFtp.prototype.prepare = function() {
 	}
 
 	var connectionString = this.connectionString;
-	var uri = uriParse.parse(connectionString, true);
-	var conn = {
-		host : uri.hostname || uri.host,
-		port : uri.port || 21
-	};
-	if (uri.auth) {
-		var auth = uri.auth.split(":", 2);
-		conn.user = auth[0];
-		if (auth.length == 2) {
-			conn.pass = auth[1];
-		}
-	}
-	conn.debugMode = true;
-	console.log("conn parse:");
-	console.log(conn);
+	var conn = parseConnString(connectionString);
+	
+	console.log("folders-ftp, conn to server",conn);
 	// NOTES: Could use rush; PWD/CWD needs to be known.
 	return new jsftp(conn);
 };
@@ -60,7 +56,7 @@ FoldersFtp.prototype.ls = function(path, cb) {
 		self.ftp.ls(".", function(err, content) {
 			if (err) {
 				console.error(err);
-				cb(null, error);
+				return cb(null, err);
 			}
 
 			cb(self.asFolders(path, content));
@@ -196,3 +192,21 @@ FoldersFtp.prototype.write = function(data, cb) {
 		// self.ftp.socket.end();
 	});
 };
+
+var parseConnString = function(connectionString){
+	var uri = uriParse.parse(connectionString, true);
+	var conn = {
+		host : uri.hostname || uri.host,
+		port : uri.port || 21
+	};
+	if (uri.auth) {
+		var auth = uri.auth.split(":", 2);
+		conn.user = auth[0];
+		if (auth.length == 2) {
+			conn.pass = auth[1];
+		}
+	}
+	conn.debugMode = true;
+	
+	return conn;
+}
