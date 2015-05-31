@@ -56,14 +56,14 @@ ftp.ls('/', function(data) {
 		console.log(data);
 
 		// step 3: cat command, get the file we put to ftp server
-		var readReq = {
-			data : {
-				fileId : testFileUri,
-				streamId : "test-stream-id",
-			},
-			shareId : "test-share-id"
-		};
-		ftp.cat(readReq, function(result) {
+	//		var readReq = {
+	//			data : {
+	//				fileId : testFileUri,
+	//				streamId : "test-stream-id",
+	//			},
+	//			shareId : "test-share-id"
+	//		};
+		ftp.cat(testFileUri, function(result) {
 			console.log("\nget file on ftp server,result");
 			console.log(data);
 

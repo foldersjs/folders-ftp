@@ -53,6 +53,10 @@ FoldersFtp.prototype.ls = function(path, cb) {
 	// NOTES: Not using connection pooling nor re-using the connection.
 	self.ftp = this.prepare();
 	self.ftp.raw.cwd("." + cwd, function(err, data) {
+		if (err){
+			console.error(err);
+			return cb(null,err);
+		}
 		self.ftp.ls(".", function(err, content) {
 			if (err) {
 				console.error(err);
@@ -104,7 +108,7 @@ FoldersFtp.prototype.asFolders = function(dir, files) {
 
 FoldersFtp.prototype.cat = function(data, cb) {
 	var self = this;
-	var path = data.data.fileId;
+	var path = data;
 	if (path.length && path.substr(0, 1) != "/")
 		path = "/" + path;
 
@@ -129,28 +133,17 @@ FoldersFtp.prototype.cat = function(data, cb) {
 		}
 		var file = files[0];
 
-		var headers = {
-			"Content-Length" : file.size,
-			"Content-Type" : "application/octet-stream",
-			"X-File-Type" : "application/octet-stream",
-			"X-File-Size" : file.size,
-			"X-File-Name" : file.name
-		};
-
 		self.ftp.get(path, function(err, socket) {
-
-			// TODO how to pass the data,
-			// stream.Readable or Buffer or
 
 			// var str = "";
 			// socket.on("data", function(d) {str += d;});
 			// socket.on("close", function(hadErr) {socket.end();});
 
 			cb({
-				streamId : data.data.streamId,
-				data : socket, // FIXME: if socket Readable stream.
-				headers : headers,
-				shareId : data.shareId
+				// return socket readable stream
+				stream: socket, 
+				size: file.size,
+				name: file.name
 			});
 
 			// self.ftp.socket.end();
