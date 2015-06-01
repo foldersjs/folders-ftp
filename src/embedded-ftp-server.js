@@ -3,6 +3,8 @@
  * The FTP Server listen on a localhost address. 
  */
 
+var Fio = require('folders');
+
 var Server = function(credentials){
 	this.FTPCredentials = credentials;
 	this.ftpServer = null;
@@ -30,11 +32,38 @@ Server.prototype.start = function(){
 				return '/';
 			},
 			getRoot: function () {
+				// also sends conn string, may be better connect point.
 				return process.cwd();
 			}
 		});
+
+		var mock = new Fio.fs(new Fio.stub());
+		mock.readdir = function(path, cb) {
+			console.log('read', dir);
+		};
+		mock.open = function(dir, cb) {
+			console.log('open', dir);
+		};
+		mock.stat = function(path, cb) {
+			console.log('stat', dir);
+			cb(null, stat);
+		};
+
+		server.on('client:connected', function(conn) {
+			var username;
+			// console.log(conn.socket.remoteAddress);
+			conn.on('command:user', function(user, success, failure) {
+				username = user;
+				success();
+				// failure();
+			});
+			conn.on('command:pass', function(pass, success, failure) {
+				success(username, mock);
+				// failure();
+			});
+		});
+
 		server.listen(FTPCredentials.port);
 	}
 };
-
 

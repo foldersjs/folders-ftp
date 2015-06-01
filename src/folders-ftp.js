@@ -11,13 +11,15 @@ var jsftp = require('jsftp');
 var FoldersFtp = function(prefix,options) {
 	this.prefix = prefix;
 	this.connectionString = options.connectionString;
+	this.server = null;
 	
 	// this is a feature to start a embedded Ftp server, using for test/debug
 	var enableEmbeddedServer = options.enableEmbeddedServer || false;
 	if (enableEmbeddedServer){
 		var conn = parseConnString(this.connectionString);
 		var Server = require('./embedded-ftp-server');
-		new Server(conn).start();
+		this.server = new Server(conn);
+		this.server.start();
 	}
 };
 
