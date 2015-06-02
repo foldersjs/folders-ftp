@@ -154,36 +154,21 @@ FoldersFtp.prototype.cat = function(data, cb) {
 
 };
 
-FoldersFtp.prototype.write = function(data, cb) {
+FoldersFtp.prototype.write = function(uri, data, cb) {
 	var self = this;
-
-	var buf = data.data;
-	var streamId = data.streamId;
-	var shareId = data.shareId;
-	var uri = data.uri;
 
 	// TODO uri normalize
 
-	var rspHeaders = {
-		"Content-Type" : "application/json"
-	};
-
 	self.ftp = this.prepare();
-
-	self.ftp.put(buf, uri, function(err) {
+	//NOTES, the jsftp lib support both buffer/Readable stream as input source.
+	self.ftp.put(data, uri, function(err) {
 		if (err) {
 			console.error("File transferred failed,", err);
 			return cb(null, err);
 		}
 
 		console.log("File transferred successfully!");
-		cb({
-			streamId : streamId,
-			data : "write uri success",
-			headers : rspHeaders,
-			shareId : shareId
-		});
-
+		cb("write uri success");
 		// self.ftp.socket.end();
 	});
 };

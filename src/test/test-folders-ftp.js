@@ -44,16 +44,9 @@ ftp.ls('/', function(data) {
 
 	// step 2: write command, put data to ftp server
 	var buf = new Buffer((new Array(960 + 1)).join("Z"));
-	var writeReq = {
-		data : buf,
-		streamId : "test-stream-id",
-		shareId : "test-share-id",
-		uri : testFileUri
-	};
-	ftp.write(writeReq, function(data) {
+	ftp.write(testFileUri,data, function(data) {
 
-		console.log("\nwrite buffer(960 Z) to the ftp server,result");
-		console.log(data);
+		console.log("\nwrite buffer(960 Z) to the ftp server,result ",data);
 
 		// step 3: cat command, get the file we put to ftp server
 	//		var readReq = {
