@@ -25,6 +25,13 @@ var FoldersFtp = function(prefix,options) {
 
 module.exports = FoldersFtp;
 
+FoldersFtp.prototype.features = FoldersFtp.features = {
+	cat : true,
+	ls : true,
+	write : true,
+	server : true
+};
+
 FoldersFtp.prototype.prepare = function() {
 	// FIXME looks like new jsftp(conn) and self.ftp.socket.end() for every
 	// action will caused some socket action. Need to check.
