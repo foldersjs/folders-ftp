@@ -3,7 +3,6 @@
  * The FTP Server listen on a localhost address. 
  */
 
-var Fio = require('folders');
 
 var Server = function(credentials){
 	this.FTPCredentials = credentials;
@@ -19,7 +18,8 @@ Server.prototype.close = function(){
 	}
 };
 
-Server.prototype.start = function(){
+
+Server.prototype.start = function(backend) {
 	var FTPCredentials = this.FTPCredentials;
 	console.log("start the FTP Embedded server,",FTPCredentials);
 	if (FTPCredentials.host === "localhost") {
@@ -37,17 +37,6 @@ Server.prototype.start = function(){
 			}
 		});
 
-		var mock = new Fio.fs(new Fio.stub());
-		mock.readdir = function(path, cb) {
-			console.log('read', dir);
-		};
-		mock.open = function(dir, cb) {
-			console.log('open', dir);
-		};
-		mock.stat = function(path, cb) {
-			console.log('stat', dir);
-			cb(null, stat);
-		};
 
 		server.on('client:connected', function(conn) {
 			var username;
@@ -58,6 +47,8 @@ Server.prototype.start = function(){
 				// failure();
 			});
 			conn.on('command:pass', function(pass, success, failure) {
+				// FIXME: Flexibly handle backend.
+				var mock = backend(username, pass);
 				success(username, mock);
 				// failure();
 			});

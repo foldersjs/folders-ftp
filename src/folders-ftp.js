@@ -19,7 +19,7 @@ var FoldersFtp = function(prefix,options) {
 		var conn = parseConnString(this.connectionString);
 		var Server = require('./embedded-ftp-server');
 		this.server = new Server(conn);
-		this.server.start();
+		this.server.start(options.backend);
 	}
 };
 
