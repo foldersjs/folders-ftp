@@ -34,7 +34,9 @@ Server.prototype.start = function(backend) {
 			getRoot: function () {
 				// also sends conn string, may be better connect point.
 				return process.cwd();
-			}
+			},
+			useReadFile:false,
+			useWriteFile:false
 		});
 
 
