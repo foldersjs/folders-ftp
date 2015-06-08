@@ -58,10 +58,25 @@ FoldersFtp.prototype.ls = function(path, cb) {
 		path = path + "/";
 
 	var cwd = path || "";
+	//cwd = "";
 
 	// NOTES: Not using connection pooling nor re-using the connection.
 	self.ftp = this.prepare();
-	self.ftp.raw.cwd("." + cwd, function(err, data) {
+	
+	self.ftp.ls(".", function(err, content) {
+			if (err) {
+				console.error(err);
+				return cb(null, err);
+			}
+
+			console.log('ls returns: ', self.asFolders(path, content));
+			cb(self.asFolders(path, content));
+
+			// FIXME there is a socket error when use this module after socket.end()
+			// self.ftp.socket.end();
+		});
+	/*
+	self.ftp.raw.cwd("/", function(err, data) {
 		if (err){
 			console.error(err);
 			return cb(null,err);
@@ -78,6 +93,7 @@ FoldersFtp.prototype.ls = function(path, cb) {
 			// self.ftp.socket.end();
 		});
 	});
+	*/
 };
 
 FoldersFtp.prototype.asFolders = function(dir, files) {
@@ -96,8 +112,11 @@ FoldersFtp.prototype.asFolders = function(dir, files) {
 		// read,write,exec)
 		for ( var meta in cols)
 			o.meta[cols[meta]] = file[cols[meta]];
+		
 		o.uri = "#" + this.prefix + o.fullPath;
 		o.size = file.size || 0;
+		
+		//FIXME: does not look right here!
 		o.extension = "txt";
 		o.type = "text/plain";
 		if (file.type == '1') {
