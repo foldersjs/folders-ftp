@@ -30,18 +30,13 @@ Server.prototype.start = function(backend) {
 
 		server = new ftpd.FtpServer('127.0.0.1', {
 			getInitialCwd: function () {
-				if (backend)
-					return '/'; //when using mock fs, don't add cwd
-				else {
-					console.log('initialCwd:', process.cwd());
-					return process.cwd();
-				}
-				//return '/';
+				return '/';
 			},
 			getRoot: function () {
 				// also sends conn string, may be better connect point.
-				//return process.cwd();
-				return '/';
+				if (backend)
+					return '/';
+				else return process.cwd();
 			},
 			useReadFile:false,
 			useWriteFile:false
@@ -58,8 +53,14 @@ Server.prototype.start = function(backend) {
 			});
 			conn.on('command:pass', function(pass, success, failure) {
 				// FIXME: Flexibly handle backend.
-				var mock = backend(username, pass);
-				success(username, mock);
+				if (typeof(backend)!='undefined') {
+					var mock = backend(username, pass);
+					success(username, mock);	
+				}
+				else {
+					success(username);
+				}
+				
 				// failure();
 			});
 		});
