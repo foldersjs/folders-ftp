@@ -140,29 +140,47 @@ FoldersFtp.prototype.asFolders = function(dir, files) {
 FoldersFtp.prototype.cat = function(data, cb) {
 	var self = this;
 	var path = data;
-	if (path.length && path.substr(0, 1) != "/")
-		path = "/" + path;
+	
+	//FIXME: this is unnecessary as we need to support relative path?
+	//if (path.length && path.substr(0, 1) != "/") 
+	//	path = "/" + path;
 
 	// var cwd = path || "";
+	
+	var dirName = path.substring(0,path.lastIndexOf("/")+1);
+	var fileName = path.substring(path.lastIndexOf('/') + 1);
+	console.log('dirName: ', dirName);
+	console.log('fileName: ', fileName);
+	
 
 	// NOTES: Not using connection pooling nor re-using the connection.
 	self.ftp = this.prepare();
 
 	// TODO more stat and file check before cat
-	self.ftp.ls(path, function(err, content) {
+	self.ftp.ls(dirName, function(err, content) {
 
 		if (err) {
 			console.error(err);
 			cb(null, err);
 		}
-
-		var files = self.asFolders(path, content);
-
-		if (files.length <= 0) {
-			console.error("file not exist");
-			cb(null, error);
+		
+		//find matching path
+		console.log('ls DONE', content);
+		
+		var files = self.asFolders(dirName, content);
+		
+		var file = null;
+		for (var i = 0; i < files.length; i++) {
+			if (files[i].fullPath == path) {
+				file = files[i]; break;
+			}
 		}
-		var file = files[0];
+
+		if (!file) {
+			console.error("file not exist");
+			cb(null, "file not exist");
+			return;
+		}
 
 		self.ftp.get(path, function(err, socket) {
 
@@ -170,6 +188,7 @@ FoldersFtp.prototype.cat = function(data, cb) {
 			// socket.on("data", function(d) {str += d;});
 			// socket.on("close", function(hadErr) {socket.end();});
 
+			socket.resume();
 			cb({
 				// return socket readable stream
 				stream: socket, 
