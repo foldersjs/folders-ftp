@@ -7,6 +7,7 @@
 var Server = function(credentials){
 	this.FTPCredentials = credentials;
 	this.ftpServer = null;
+	
 	console.log("inin the FTP Embedded server,",credentials);
 };
 
@@ -29,11 +30,18 @@ Server.prototype.start = function(backend) {
 
 		server = new ftpd.FtpServer('127.0.0.1', {
 			getInitialCwd: function () {
-				return '/';
+				if (backend)
+					return '/'; //when using mock fs, don't add cwd
+				else {
+					console.log('initialCwd:', process.cwd());
+					return process.cwd();
+				}
+				//return '/';
 			},
 			getRoot: function () {
 				// also sends conn string, may be better connect point.
-				return process.cwd();
+				//return process.cwd();
+				return '/';
 			},
 			useReadFile:false,
 			useWriteFile:false
