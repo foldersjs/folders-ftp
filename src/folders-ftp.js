@@ -9,6 +9,7 @@ var jsftp = require('jsftp');
 // var rush = require('node-rush');
 
 var FoldersFtp = function(prefix,options) {
+	console.log('FoldersFtp');
 	this.prefix = prefix;
 	this.connectionString = options.connectionString;
 	this.server = null;
@@ -87,10 +88,11 @@ FoldersFtp.prototype.ls = function(path, cb) {
 		self.ftp.ls(".", function(err, content) {
 			if (err) {
 				console.error(err);
-				return cb(null, err);
+				//return cb(null, err);
+				return cb(err);
 			}
 
-			cb(self.asFolders(path, content));
+			cb(null, self.asFolders(path, content));
 
 			// FIXME there is a socket error when use this module after socket.end()
 			// self.ftp.socket.end();
@@ -100,13 +102,18 @@ FoldersFtp.prototype.ls = function(path, cb) {
 };
 
 FoldersFtp.prototype.asFolders = function(dir, files) {
+	console.log('asFolders', dir, files);
 	var out = [];
 	for (var i = 0; i < files.length; i++) {
 		var file = files[i];
 		var o = {
 			name : file.name
 		};
-		o.fullPath = dir + file.name;
+		if (dir=='.')
+			o.fullPath = file.name;
+		else
+			o.fullPath = dir + file.name;
+		
 		if (!o.meta)
 			o.meta = {};
 		var cols = [ 'permission', 'owner', 'group' ];
@@ -116,7 +123,9 @@ FoldersFtp.prototype.asFolders = function(dir, files) {
 		for ( var meta in cols)
 			o.meta[cols[meta]] = file[cols[meta]];
 		
-		o.uri = "#" + this.prefix + o.fullPath;
+		//FIXME: restore prefix logic later
+		//o.uri = "#" + this.prefix + o.fullPath;
+		o.uri = o.fullPath;
 		o.size = file.size || 0;
 		
 		//FIXME: does not look right here!
