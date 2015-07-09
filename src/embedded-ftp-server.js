@@ -34,9 +34,12 @@ Server.prototype.start = function(backend) {
 			},
 			getRoot: function () {
 				// also sends conn string, may be better connect point.
+				console.log('getRoot __dirname: ', __dirname);
 				if (backend)
 					return '/';
-				else return process.cwd();
+				//else return process.cwd();
+				//else return '/Users/hai/Websites/folders.io/folders-ftp/test'
+				else  return __dirname + "/../test";
 			},
 			useReadFile:false,
 			useWriteFile:false
