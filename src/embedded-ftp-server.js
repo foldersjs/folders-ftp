@@ -23,6 +23,8 @@ Server.prototype.close = function(){
 Server.prototype.start = function(backend) {
 	var FTPCredentials = this.FTPCredentials;
 	console.log("start the FTP Embedded server,",FTPCredentials);
+	console.log("FTP Backend: ", backend);
+	console.log('readdir?' , typeof(backend.readdir));
 	if (FTPCredentials.host === "localhost") {
 
 		var ftpd = require("ftpd");
@@ -30,11 +32,16 @@ Server.prototype.start = function(backend) {
 
 		server = new ftpd.FtpServer('127.0.0.1', {
 			getInitialCwd: function () {
+				
+				//FIXME: quickhack to test S#
+				//if (backend)
+				//	return '/S3/us-east-1/foldersio/';
+				//else
 				return '/';
 			},
 			getRoot: function () {
 				// also sends conn string, may be better connect point.
-				console.log('getRoot __dirname: ', __dirname);
+				//console.log('getRoot __dirname: ', __dirname);
 				if (backend)
 					return '/';
 				//else return process.cwd();
@@ -55,10 +62,12 @@ Server.prototype.start = function(backend) {
 				// failure();
 			});
 			conn.on('command:pass', function(pass, success, failure) {
+				console.log('command:pass', pass);
 				// FIXME: Flexibly handle backend.
 				if (typeof(backend)!='undefined') {
-					var mock = backend(username, pass);
-					success(username, mock);	
+					console.log("using backend", backend);
+					//var mock = backend(username, pass);
+					success(username, backend);	
 				}
 				else {
 					success(username);
