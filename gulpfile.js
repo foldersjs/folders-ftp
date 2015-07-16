@@ -7,7 +7,7 @@ gulp.task('default', function() {
 
 var jshint = require('gulp-jshint');
 
-var core = ['*.js'];
+var core = ['./src/*.js'];
 
 // JS hint task
 gulp.task('jshint', function() {
@@ -24,7 +24,7 @@ gulp.task('test', function (cb) {
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
     .on('finish', function () {
-      gulp.src(['test/*.js'])
+      gulp.src(['./src/test/*.js'])
         .pipe(mocha())
         .pipe(istanbul.writeReports()) // Creating the reports after tests runned
         .on('end', cb)

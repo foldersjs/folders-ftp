@@ -23,8 +23,8 @@ Server.prototype.close = function(){
 Server.prototype.start = function(backend) {
 	var FTPCredentials = this.FTPCredentials;
 	console.log("start the FTP Embedded server,",FTPCredentials);
-	console.log("FTP Backend: ", backend);
-	console.log('readdir?' , typeof(backend.readdir));
+	//console.log("FTP Backend: ", backend);
+	//console.log('readdir?' , typeof(backend.readdir));
 	if (FTPCredentials.host === "localhost") {
 
 		var ftpd = require("ftpd");
