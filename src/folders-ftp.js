@@ -10,6 +10,7 @@ var jsftp = require('jsftp');
 
 var FoldersFtp = function(prefix,options) {
 	console.log('FoldersFtp');
+	this.options = options || {};
 	this.prefix = prefix;
 	this.connectionString = options.connectionString;
 	this.server = null;
@@ -24,6 +25,13 @@ var FoldersFtp = function(prefix,options) {
 	}
 };
 
+FoldersFtp.dataVolume = function(){
+
+	return {RXOK:FoldersFtp.RXOK,TXOK:FoldersFtp.TXOK};
+};
+
+FoldersFtp.TXOK = 0 ;
+FoldersFtp.RXOK = 0 ;
 module.exports = FoldersFtp;
 
 FoldersFtp.prototype.features = FoldersFtp.features = {
@@ -217,6 +225,10 @@ FoldersFtp.prototype.write = function(uri, data, cb) {
 	// TODO uri normalize
 
 	self.ftp = this.prepare();
+	data.on('data',function(d){
+		
+		FoldersFtp.RXOK +=d.length;
+	});
 	//NOTES, the jsftp lib support both buffer/Readable stream as input source.
 	self.ftp.put(data, uri, function(err) {
 		if (err) {
@@ -230,6 +242,10 @@ FoldersFtp.prototype.write = function(uri, data, cb) {
 	});
 };
 
+FoldersFtp.prototype.dump = function(){
+
+	return this.options;
+};
 var parseConnString = function(connectionString){
 	var uri = uriParse.parse(connectionString, true);
 	var conn = {
